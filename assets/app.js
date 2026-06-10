@@ -12,10 +12,21 @@
   const img = (u, size) => u ? u.replace('/dynamic/default/', '/dynamic/' + size + '/') : '';
   const priceFmt = (p) => p == null ? 'Gis bort' : p.toLocaleString('nb-NO') + ' kr';
   const finnUrl = (id) => 'https://www.finn.no/recommerce/forsale/item/' + id;
-
-  // Hovedkategori = første ledd ("Klær / Dame / Bukser" -> "Klær")
   const mainCat = (c) => (c || 'Annet').split('/')[0].trim() || 'Annet';
 
+  /* ---------- Scroll-reveal ---------- */
+  const revealObs = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        const i = +e.target.dataset.idx || 0;
+        e.target.style.transitionDelay = (i % 4) * 60 + 'ms';
+        e.target.classList.add('in');
+        revealObs.unobserve(e.target);
+      }
+    }
+  }, { rootMargin: '60px' });
+
+  /* ---------- Filtrering ---------- */
   function filtered() {
     const q = state.q.toLowerCase();
     let list = state.all.filter((p) =>
@@ -31,70 +42,175 @@
   function renderChips() {
     const counts = {};
     for (const p of state.all) { const c = mainCat(p.cat); counts[c] = (counts[c] || 0) + 1; }
-    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 9).map(([c]) => c);
-    const cats = ['Alle', ...top];
-    chipsEl.innerHTML = cats.map((c) =>
-      `<button class="chip${c === state.cat ? ' active' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const cats = [['Alle', state.all.length], ...top];
+    chipsEl.innerHTML = cats.map(([c, n]) =>
+      `<button class="chip${c === state.cat ? ' active' : ''}" data-cat="${esc(c)}">${esc(c)}<span class="n">${n.toLocaleString('nb-NO')}</span></button>`
     ).join('');
+  }
+
+  function cardHtml(p, idx) {
+    return `
+      <button class="card" data-id="${p.id}" data-idx="${idx}">
+        <div class="imgbox">
+          <img loading="lazy" src="${esc(img(p.imgs[0], '480w'))}" alt="${esc(p.title)}">
+          ${p.imgs.length > 1 ? `<span class="photos">${p.imgs.length} 📷</span>` : ''}
+          <div class="img-veil"><span class="see">Se nærmere</span></div>
+        </div>
+        <div class="title">${esc(p.title)}</div>
+        <div class="price">${priceFmt(p.price)}</div>
+      </button>`;
   }
 
   function render() {
     const list = filtered();
     const slice = list.slice(0, state.shown);
-    grid.innerHTML = slice.map((p) => `
-      <button class="card" data-id="${p.id}">
-        <div class="imgbox"><img loading="lazy" src="${esc(img(p.imgs[0], '480w'))}" alt="${esc(p.title)}"></div>
-        <div class="title">${esc(p.title)}</div>
-        <div class="price">${priceFmt(p.price)}</div>
-      </button>`).join('');
-    countEl.textContent = list.length.toLocaleString('nb-NO') + ' skatter';
+    grid.innerHTML = slice.map(cardHtml).join('');
+    grid.querySelectorAll('.card').forEach((c) => revealObs.observe(c));
+    countEl.textContent = `Viser ${Math.min(state.shown, list.length).toLocaleString('nb-NO')} av ${list.length.toLocaleString('nb-NO')} skatter`;
     moreBtn.parentElement.style.display = list.length > state.shown ? '' : 'none';
     emptyEl.hidden = list.length > 0;
   }
 
-  function openProduct(p) {
-    const thumbs = p.imgs.length > 1 ? `<div class="thumbs">${p.imgs.map((u, i) =>
-      `<button data-i="${i}" class="${i === 0 ? 'active' : ''}"><img loading="lazy" src="${esc(img(u, '480w'))}" alt=""></button>`).join('')}</div>` : '';
-    sheetBody.innerHTML = `
-      <div class="gallery">
-        <div class="main"><img id="mainImg" src="${esc(img(p.imgs[0], '1280w'))}" alt="${esc(p.title)}"></div>
-        ${thumbs}
-      </div>
-      <div class="detail">
-        <h2>${esc(p.title)}</h2>
-        <div class="price">${priceFmt(p.price)}</div>
-        <div class="meta">${esc(p.cat || '')}${p.cond ? ' · ' + esc(p.cond) : ''}</div>
-        <div class="desc">${esc(p.desc || '')}</div>
-        <div class="actions">
-          <a class="btn-finn" href="${finnUrl(p.id)}" target="_blank" rel="noopener">Kjøp trygt på FINN</a>
-        </div>
-        <p class="safe">Du sendes til den originale FINN-annonsen, der du kan kjøpe med Fiks ferdig eller sende melding.</p>
-      </div>`;
-    sheetBody.querySelectorAll('.thumbs button').forEach((b) => {
-      b.addEventListener('click', () => {
-        sheetBody.querySelector('#mainImg').src = img(p.imgs[+b.dataset.i], '1280w');
-        sheetBody.querySelectorAll('.thumbs button').forEach((x) => x.classList.remove('active'));
-        b.classList.add('active');
-      });
+  /* ---------- Hero-collage ---------- */
+  function buildCollage() {
+    const cols = document.querySelectorAll('.collage-col');
+    if (!cols.length) return;
+    // plukk produkter med bilder, spredt utover samlingen
+    const withImg = state.all.filter((p) => p.imgs.length);
+    const picks = [];
+    for (let i = 0; i < 6 && withImg.length; i++) {
+      picks.push(withImg[Math.floor((i * 997) % withImg.length)]);
+    }
+    cols.forEach((col, ci) => {
+      col.innerHTML = picks.slice(ci * 3, ci * 3 + 3).map((p) =>
+        `<div class="collage-tile"><img loading="lazy" src="${esc(img(p.imgs[0], '480w'))}" alt=""></div>`).join('');
     });
+    // svak parallax
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y > 900) return;
+      cols.forEach((col) => { col.style.transform = `translateY(${y * +col.dataset.speed}px)`; });
+    }, { passive: true });
+  }
+
+  /* ---------- Utvalgte ---------- */
+  function buildFeatured() {
+    const el = $('featuredScroll');
+    // mest verdifulle med flere bilder = "stolt av"
+    const picks = state.all
+      .filter((p) => p.imgs.length >= 3 && p.price >= 200)
+      .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
+      .slice(0, 14);
+    el.innerHTML = picks.map((p) => `
+      <button class="feat-card" data-id="${p.id}">
+        <div class="imgbox">
+          <span class="feat-tag">Utvalgt</span>
+          <img loading="lazy" src="${esc(img(p.imgs[0], '480w'))}" alt="${esc(p.title)}">
+        </div>
+        <div class="feat-info">
+          <div class="title">${esc(p.title)}</div>
+          <div class="price">${priceFmt(p.price)}</div>
+        </div>
+      </button>`).join('');
+    el.addEventListener('click', (e) => {
+      const c = e.target.closest('.feat-card'); if (!c) return;
+      const p = state.all.find((x) => x.id === +c.dataset.id);
+      if (p) openProduct(p);
+    });
+    $('featPrev').addEventListener('click', () => el.scrollBy({ left: -640, behavior: 'smooth' }));
+    $('featNext').addEventListener('click', () => el.scrollBy({ left: 640, behavior: 'smooth' }));
+  }
+
+  /* ---------- Produktdetalj ---------- */
+  let galIdx = 0, galProduct = null;
+
+  function setGalImg(i) {
+    if (!galProduct) return;
+    galIdx = (i + galProduct.imgs.length) % galProduct.imgs.length;
+    const main = sheetBody.querySelector('#mainImg');
+    if (main) main.src = img(galProduct.imgs[galIdx], '1280w');
+    const cnt = sheetBody.querySelector('.gal-count');
+    if (cnt) cnt.textContent = (galIdx + 1) + ' / ' + galProduct.imgs.length;
+    sheetBody.querySelectorAll('.thumbs button').forEach((b, j) => b.classList.toggle('active', j === galIdx));
+  }
+
+  function relatedFor(p) {
+    const sameLeaf = state.all.filter((x) => x.id !== p.id && x.cat === p.cat);
+    const sameMain = state.all.filter((x) => x.id !== p.id && mainCat(x.cat) === mainCat(p.cat) && x.cat !== p.cat);
+    return [...sameLeaf, ...sameMain].slice(0, 4);
+  }
+
+  function openProduct(p) {
+    galProduct = p; galIdx = 0;
+    const multi = p.imgs.length > 1;
+    const rel = relatedFor(p);
+    sheetBody.innerHTML = `
+      <div class="sheet-cols">
+        <div class="gallery">
+          <div class="main">
+            <img id="mainImg" src="${esc(img(p.imgs[0], '1280w'))}" alt="${esc(p.title)}">
+            ${multi ? `
+              <button class="gal-nav prev" aria-label="Forrige bilde">←</button>
+              <button class="gal-nav next" aria-label="Neste bilde">→</button>
+              <span class="gal-count">1 / ${p.imgs.length}</span>` : ''}
+          </div>
+          ${multi ? `<div class="thumbs">${p.imgs.map((u, i) =>
+            `<button data-i="${i}" class="${i === 0 ? 'active' : ''}"><img loading="lazy" src="${esc(img(u, '480w'))}" alt=""></button>`).join('')}</div>` : ''}
+        </div>
+        <div class="detail">
+          <h2>${esc(p.title)}</h2>
+          <div class="price">${priceFmt(p.price)}</div>
+          <div class="meta-chips">
+            ${p.cat ? `<span>${esc(mainCat(p.cat))}</span>` : ''}
+            ${p.cond ? `<span>${esc(p.cond)}</span>` : ''}
+            <span>Sendes fra Drammen</span>
+          </div>
+          <div class="desc">${esc(p.desc || '')}</div>
+          <div class="actions">
+            <a class="btn-finn" href="${finnUrl(p.id)}" target="_blank" rel="noopener">Kjøp trygt på FINN →</a>
+          </div>
+          <p class="safe">Du sendes til den originale FINN-annonsen, der du kan kjøpe med Fiks ferdig eller sende melding.</p>
+        </div>
+      </div>
+      ${rel.length ? `
+      <div class="related">
+        <h3>Flere skatter du kanskje liker</h3>
+        <div class="related-grid">${rel.map((r) => `
+          <button class="rel-card" data-id="${r.id}">
+            <div class="imgbox"><img loading="lazy" src="${esc(img(r.imgs[0], '480w'))}" alt="${esc(r.title)}"></div>
+            <div class="title">${esc(r.title)}</div>
+            <div class="price">${priceFmt(r.price)}</div>
+          </button>`).join('')}</div>
+      </div>` : ''}`;
+
+    if (multi) {
+      sheetBody.querySelector('.gal-nav.prev').addEventListener('click', () => setGalImg(galIdx - 1));
+      sheetBody.querySelector('.gal-nav.next').addEventListener('click', () => setGalImg(galIdx + 1));
+      sheetBody.querySelectorAll('.thumbs button').forEach((b) => b.addEventListener('click', () => setGalImg(+b.dataset.i)));
+    }
+    sheetBody.querySelectorAll('.rel-card').forEach((b) => b.addEventListener('click', () => {
+      const r = state.all.find((x) => x.id === +b.dataset.id);
+      if (r) { history.replaceState('', '', '#p/' + r.id); openProduct(r); overlay.querySelector('.sheet').scrollTop = 0; }
+    }));
     overlay.hidden = false;
     document.body.style.overflow = 'hidden';
   }
 
   function closeProduct() {
     overlay.hidden = true;
+    galProduct = null;
     document.body.style.overflow = '';
     if (location.hash.startsWith('#p/')) history.pushState('', '', location.pathname);
   }
 
-  // Events
+  /* ---------- Events ---------- */
   $('search').addEventListener('input', (e) => { state.q = e.target.value; state.shown = PAGE_SIZE; render(); });
   $('sort').addEventListener('change', (e) => { state.sort = e.target.value; state.shown = PAGE_SIZE; render(); });
   chipsEl.addEventListener('click', (e) => {
     const b = e.target.closest('.chip'); if (!b) return;
     state.cat = b.dataset.cat; state.shown = PAGE_SIZE;
     renderChips(); render();
-    window.scrollTo({ top: grid.offsetTop - 140, behavior: 'smooth' });
   });
   moreBtn.addEventListener('click', () => { state.shown += PAGE_SIZE; render(); });
   grid.addEventListener('click', (e) => {
@@ -104,19 +220,32 @@
   });
   $('closeBtn').addEventListener('click', closeProduct);
   $('overlayBackdrop').addEventListener('click', closeProduct);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) closeProduct(); });
+  document.addEventListener('keydown', (e) => {
+    if (overlay.hidden) return;
+    if (e.key === 'Escape') closeProduct();
+    else if (e.key === 'ArrowLeft' && galProduct) setGalImg(galIdx - 1);
+    else if (e.key === 'ArrowRight' && galProduct) setGalImg(galIdx + 1);
+  });
   $('brandLink').addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-  // Init
+  const toTop = $('toTop');
+  window.addEventListener('scroll', () => toTop.classList.toggle('show', window.scrollY > 800), { passive: true });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  /* ---------- Init ---------- */
+  grid.innerHTML = Array.from({ length: 12 }, () => '<div class="skel"></div>').join('');
+
   fetch('data/products.json')
     .then((r) => r.json())
     .then((data) => {
       state.all = data;
+      $('statCount').textContent = data.length.toLocaleString('nb-NO');
       renderChips();
       render();
-      // Åpne direkte produktlenke (#p/12345)
+      buildCollage();
+      buildFeatured();
       const m = location.hash.match(/^#p\/(\d+)/);
       if (m) { const p = state.all.find((x) => x.id === +m[1]); if (p) openProduct(p); }
     })
-    .catch(() => { emptyEl.hidden = false; emptyEl.textContent = 'Kunne ikke laste produktene.'; });
+    .catch(() => { grid.innerHTML = ''; emptyEl.hidden = false; emptyEl.textContent = 'Kunne ikke laste produktene.'; });
 })();

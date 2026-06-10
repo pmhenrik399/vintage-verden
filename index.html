@@ -4,17 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vintage Verden — Brukt & elsket</title>
-  <meta name="description" content="Vintage Verden — håndplukkede skatter til salgs. Klær, skjønnhet, interiør og mer. Selger med 9,9 i vurdering på FINN.">
+  <meta name="description" content="Vintage Verden — 2 280 håndplukkede skatter til salgs. Porselen, kunstglass, vintage klær, retro interiør og mer. Selger med 9,9 i vurdering på FINN.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://images.finncdn.no">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header" id="top">
     <div class="wrap header-inner">
-      <a class="brand" href="#" id="brandLink">Vintage Verden</a>
+      <a class="brand" href="#" id="brandLink">Vintage<span class="brand-dot">·</span>Verden</a>
+      <nav class="main-nav">
+        <a href="#katalog">Skattene</a>
+        <a href="#utvalgte">Utvalgte</a>
+        <a href="#vurderinger">Vurderinger</a>
+      </nav>
       <a class="rating-badge" href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">
         <span class="score">9,9</span>
         <span class="rating-text">1 088 vurderinger<br>på FINN</span>
@@ -23,20 +29,69 @@
   </header>
 
   <section class="hero">
-    <div class="wrap">
-      <h1>Brukt &amp; elsket.<br>Klart for et nytt hjem.</h1>
-      <p class="lede">Håndplukkede skatter — klær, skjønnhet og småting til hverdagen. Alt sendes gjerne, og alt selges trygt via FINN.</p>
-      <div class="search-row">
-        <input type="search" id="search" placeholder="Søk blant skattene …" autocomplete="off">
+    <div class="hero-glow"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="hero-kicker">— Håndplukket, brukt &amp; elsket</div>
+        <h1>Skatter med <em>historie</em>,<br>klare for et nytt hjem.</h1>
+        <p class="lede">Norsk porselen, kunstglass, vintage klær og småting som gjør hverdagen vakrere. Alt sendes gjerne — og alt selges trygt via FINN.</p>
+        <div class="hero-actions">
+          <a class="btn-solid" href="#katalog">Utforsk skattene</a>
+          <a class="btn-ghost" href="#utvalgte">Se utvalgte ↓</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong id="statCount">2 280</strong><span>skatter til salgs</span></div>
+          <div class="divider"></div>
+          <div><strong>9,9 <span class="star">★</span></strong><span>av 10 i vurdering</span></div>
+          <div class="divider"></div>
+          <div><strong>1 088</strong><span>fornøyde kjøpere</span></div>
+        </div>
+      </div>
+      <div class="hero-collage" id="collage" aria-hidden="true">
+        <div class="collage-col" data-speed="0.05"></div>
+        <div class="collage-col" data-speed="-0.04"></div>
       </div>
     </div>
   </section>
 
-  <main class="wrap">
-    <div class="toolbar">
-      <div class="chips" id="chips"></div>
-      <div class="toolbar-right">
-        <span id="count" class="count"></span>
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack">
+      <span>Norsk porselen</span><i>✦</i><span>Kunstglass</span><i>✦</i><span>Vintage klær</span><i>✦</i><span>Retro interiør</span><i>✦</i><span>Antikviteter</span><i>✦</i><span>Skjønnhet</span><i>✦</i><span>Håndarbeid</span><i>✦</i><span>Servise</span><i>✦</i>
+    </div>
+  </div>
+
+  <section class="featured" id="utvalgte">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Ukens utvalgte</div>
+          <h2>Skatter vi er litt ekstra<br>stolte av <em>akkurat nå</em></h2>
+        </div>
+        <div class="featured-nav">
+          <button id="featPrev" aria-label="Forrige">←</button>
+          <button id="featNext" aria-label="Neste">→</button>
+        </div>
+      </div>
+    </div>
+    <div class="featured-scroll" id="featuredScroll"></div>
+  </section>
+
+  <main class="catalog" id="katalog">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Hele samlingen</div>
+          <h2>Finn <em>din</em> skatt</h2>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar-sticky">
+      <div class="wrap toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="search" placeholder="Søk blant skattene …" autocomplete="off">
+        </div>
+        <div class="chips" id="chips"></div>
         <select id="sort" aria-label="Sortering">
           <option value="new">Nyeste først</option>
           <option value="cheap">Lavest pris</option>
@@ -45,32 +100,46 @@
         </select>
       </div>
     </div>
-    <div class="grid" id="grid"></div>
-    <div class="more-row"><button id="more" class="btn-more">Vis flere</button></div>
-    <p id="empty" class="empty" hidden>Ingen treff — prøv et annet søk.</p>
+    <div class="wrap">
+      <p id="count" class="count"></p>
+      <div class="grid" id="grid"></div>
+      <div class="more-row"><button id="more" class="btn-more">Vis flere skatter</button></div>
+      <p id="empty" class="empty" hidden>Ingen treff — prøv et annet søk. 🌿</p>
+    </div>
   </main>
 
-  <section class="reviews-cta">
-    <div class="wrap">
-      <div class="stars">★★★★★</div>
-      <h2>Trygg handel, hver gang</h2>
-      <p>Over <strong>1 088 fornøyde kjøpere</strong> har gitt meg <strong>9,9 av 10</strong> i vurdering på FINN. Les gjerne hva de sier før du handler.</p>
-      <a class="btn-primary" href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">Les vurderingene på FINN</a>
+  <section class="reviews-cta" id="vurderinger">
+    <div class="reviews-bg" aria-hidden="true"></div>
+    <div class="wrap reviews-inner">
+      <div class="big-score">
+        <div class="score-num">9,9</div>
+        <div class="score-of">av 10</div>
+        <div class="stars">★★★★★</div>
+      </div>
+      <div class="reviews-copy">
+        <div class="eyebrow light">Trygg handel, hver gang</div>
+        <h2>1 088 kjøpere har sagt sitt</h2>
+        <p>Hver eneste handel går gjennom FINN — med Fiks ferdig-frakt, kjøperbeskyttelse og åpne vurderinger. Les gjerne hva tidligere kjøpere sier før du slår til.</p>
+        <a class="btn-light" href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">Les alle vurderingene på FINN →</a>
+      </div>
     </div>
   </section>
 
   <footer class="site-footer">
-    <div class="wrap footer-inner">
-      <div>
-        <div class="brand small">Vintage Verden</div>
-        <p>Alle kjøp gjennomføres trygt via FINN — med Fiks ferdig-frakt eller henting.</p>
-      </div>
-      <div class="footer-links">
-        <a href="https://www.finn.no/profile/ads?userId=1836445377" target="_blank" rel="noopener">Alle annonser på FINN</a>
-        <a href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">Vurderinger</a>
+    <div class="wrap">
+      <div class="footer-brand">Vintage·Verden</div>
+      <div class="footer-cols">
+        <p>Håndplukkede bruktskatter fra Drammen — sendes i hele Norge. Alle kjøp gjennomføres trygt via FINN med Fiks ferdig eller henting.</p>
+        <div class="footer-links">
+          <a href="https://www.finn.no/profile/ads?userId=1836445377" target="_blank" rel="noopener">Alle annonser på FINN</a>
+          <a href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">Vurderinger</a>
+          <a href="#top">Til toppen ↑</a>
+        </div>
       </div>
     </div>
   </footer>
+
+  <button class="to-top" id="toTop" aria-label="Til toppen">↑</button>
 
   <!-- Produktdetalj-overlay -->
   <div class="overlay" id="overlay" hidden>
