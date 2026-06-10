@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vintage Verden — Brukt & elsket</title>
+  <meta name="description" content="Vintage Verden — håndplukkede skatter til salgs. Klær, skjønnhet, interiør og mer. Selger med 9,9 i vurdering på FINN.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#" id="brandLink">Vintage Verden</a>
+      <a class="rating-badge" href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">
+        <span class="score">9,9</span>
+        <span class="rating-text">1 088 vurderinger<br>på FINN</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <h1>Brukt &amp; elsket.<br>Klart for et nytt hjem.</h1>
+      <p class="lede">Håndplukkede skatter — klær, skjønnhet og småting til hverdagen. Alt sendes gjerne, og alt selges trygt via FINN.</p>
+      <div class="search-row">
+        <input type="search" id="search" placeholder="Søk blant skattene …" autocomplete="off">
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="toolbar">
+      <div class="chips" id="chips"></div>
+      <div class="toolbar-right">
+        <span id="count" class="count"></span>
+        <select id="sort" aria-label="Sortering">
+          <option value="new">Nyeste først</option>
+          <option value="cheap">Lavest pris</option>
+          <option value="dear">Høyest pris</option>
+          <option value="az">A–Å</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="more-row"><button id="more" class="btn-more">Vis flere</button></div>
+    <p id="empty" class="empty" hidden>Ingen treff — prøv et annet søk.</p>
+  </main>
+
+  <section class="reviews-cta">
+    <div class="wrap">
+      <div class="stars">★★★★★</div>
+      <h2>Trygg handel, hver gang</h2>
+      <p>Over <strong>1 088 fornøyde kjøpere</strong> har gitt meg <strong>9,9 av 10</strong> i vurdering på FINN. Les gjerne hva de sier før du handler.</p>
+      <a class="btn-primary" href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">Les vurderingene på FINN</a>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <div class="brand small">Vintage Verden</div>
+        <p>Alle kjøp gjennomføres trygt via FINN — med Fiks ferdig-frakt eller henting.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://www.finn.no/profile/ads?userId=1836445377" target="_blank" rel="noopener">Alle annonser på FINN</a>
+        <a href="https://www.finn.no/profile/reviews?userId=1836445377" target="_blank" rel="noopener">Vurderinger</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Produktdetalj-overlay -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="overlay-backdrop" id="overlayBackdrop"></div>
+    <div class="sheet" role="dialog" aria-modal="true">
+      <button class="close" id="closeBtn" aria-label="Lukk">×</button>
+      <div class="sheet-body" id="sheetBody"></div>
+    </div>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
