@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://images.finncdn.no">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
 </head>
@@ -39,12 +39,12 @@
           <a class="btn-solid" href="#katalog">Utforsk skattene</a>
           <a class="btn-ghost" href="#utvalgte">Se utvalgte ↓</a>
         </div>
-        <div class="hero-stats">
-          <div><strong id="statCount">2 280</strong><span>skatter til salgs</span></div>
+        <div class="hero-stats" id="heroStats">
+          <div><strong><span class="num" id="statCount" data-target="2280" data-dec="0">0</span></strong><span>skatter til salgs</span></div>
           <div class="divider"></div>
-          <div><strong>9,9 <span class="star">★</span></strong><span>av 10 i vurdering</span></div>
+          <div><strong><span class="num" data-target="9.9" data-dec="1">0</span> <span class="star">★</span></strong><span>av 10 i vurdering</span></div>
           <div class="divider"></div>
-          <div><strong>1 088</strong><span>fornøyde kjøpere</span></div>
+          <div><strong><span class="num" data-target="1088" data-dec="0">0</span></strong><span>fornøyde kjøpere</span></div>
         </div>
       </div>
       <div class="hero-collage" id="collage" aria-hidden="true">

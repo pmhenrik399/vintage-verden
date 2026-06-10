@@ -10,6 +10,7 @@
   --radius: 16px;
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -126,6 +127,20 @@ h2 {
 .hero-stats .star { color: var(--gold); font-size: 1.1rem; }
 .hero-stats span { font-size: 0.78rem; color: var(--ink-soft); }
 .hero-stats .divider { width: 1px; height: 34px; background: var(--line); }
+
+/* Entré-animasjon i hero */
+.hero-copy > * { opacity: 0; transform: translateY(20px); animation: fadeUp .75s cubic-bezier(.2,.7,.3,1) forwards; }
+.hero-copy > *:nth-child(1) { animation-delay: .05s; }
+.hero-copy > *:nth-child(2) { animation-delay: .15s; }
+.hero-copy > *:nth-child(3) { animation-delay: .27s; }
+.hero-copy > *:nth-child(4) { animation-delay: .39s; }
+.hero-copy > *:nth-child(5) { animation-delay: .52s; }
+@keyframes fadeUp { to { opacity: 1; transform: none; } }
+.collage-tile { opacity: 0; transform: scale(.94) translateY(14px); animation: tileIn .8s cubic-bezier(.2,.7,.3,1) forwards; }
+.collage-col .collage-tile:nth-child(1) { animation-delay: .25s; }
+.collage-col .collage-tile:nth-child(2) { animation-delay: .4s; }
+.collage-col .collage-tile:nth-child(3) { animation-delay: .55s; }
+@keyframes tileIn { to { opacity: 1; transform: none; } }
 
 /* Hero-collage */
 .hero-collage {
@@ -285,6 +300,17 @@ h2 {
   aspect-ratio: 4 / 5; overflow: hidden;
   border-radius: var(--radius);
   background: #ece5d8; border: 1px solid var(--line);
+}
+
+/* 3D-tilt + glans (kun mus/pekeplate) */
+@media (hover: hover) and (pointer: fine) {
+  .imgbox { transition: transform .3s cubic-bezier(.2,.7,.3,1), box-shadow .3s ease; will-change: transform; }
+  .imgbox.tilting { transition: box-shadow .3s ease; box-shadow: 0 26px 50px -22px rgba(26,22,18,.42); }
+}
+.glare {
+  position: absolute; inset: 0; z-index: 2;
+  opacity: 0; transition: opacity .25s ease;
+  pointer-events: none; border-radius: inherit;
 }
 .card img {
   width: 100%; height: 100%; object-fit: cover; display: block;
@@ -455,12 +481,41 @@ h2 {
 .thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .detail h2 { font-size: 1.65rem; }
-.detail .price { font-family: var(--font-display); font-size: 1.7rem; color: var(--accent-deep); margin: 14px 0 12px; }
-.meta-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.meta-chips span {
-  font-size: 0.76rem; font-weight: 500;
-  background: var(--bg); border: 1px solid var(--line);
-  padding: 5px 12px; border-radius: 999px; color: var(--ink-soft);
+
+/* Vintage-kvittering */
+.receipt {
+  font-family: var(--font-mono); font-size: 0.8rem;
+  background: #fffef7; color: #2b261f;
+  border: 1px solid var(--line); border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  padding: 20px 20px 14px;
+  margin: 18px 0 0;
+  box-shadow: 0 14px 30px -18px rgba(26,22,18,.3);
+  transform: rotate(-0.4deg);
+}
+.receipt .r-head { text-align: center; font-weight: 700; letter-spacing: .2em; font-size: 0.86rem; }
+.receipt .r-sub { text-align: center; color: #8a8071; font-size: 0.7rem; margin-top: 2px; }
+.receipt .r-line { border-top: 1px dashed #c9bfae; margin: 12px 0; }
+.receipt .r-row { display: flex; justify-content: space-between; gap: 14px; padding: 2px 0; }
+.receipt .r-row span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.receipt .r-row span:last-child { white-space: nowrap; }
+.receipt .r-row.dim { color: #8a8071; font-size: 0.72rem; }
+.receipt .r-row.total { font-weight: 700; font-size: 0.95rem; }
+.receipt .barcode {
+  display: flex; align-items: flex-end; height: 34px;
+  margin: 14px auto 4px; width: fit-content; max-width: 100%; overflow: hidden;
+}
+.receipt .barcode i { display: block; height: 100%; background: #2b261f; }
+.receipt .r-id { text-align: center; font-size: 0.68rem; color: #8a8071; letter-spacing: .14em; }
+.receipt .r-thanks { text-align: center; font-size: 0.66rem; letter-spacing: .12em; margin-top: 10px; color: #6f675c; }
+.receipt-tear {
+  height: 12px; margin: 0 0 4px; transform: rotate(-0.4deg);
+  background-image:
+    linear-gradient(45deg, #fffef7 25%, transparent 25%),
+    linear-gradient(-45deg, #fffef7 25%, transparent 25%);
+  background-size: 14px 14px;
+  background-position: 0 0;
+  filter: drop-shadow(0 8px 10px rgba(26,22,18,.12));
 }
 .detail .desc { white-space: pre-wrap; font-size: 0.95rem; color: #443e35; border-top: 1px solid var(--line); padding-top: 20px; }
 .detail .actions { margin-top: 28px; }
@@ -483,3 +538,10 @@ h2 {
 .rel-card:hover img { transform: scale(1.06); }
 .rel-card .title { font-size: 0.8rem; font-weight: 500; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
 .rel-card .price { font-size: 0.8rem; color: var(--accent-deep); margin-top: 2px; font-family: var(--font-display); }
+
+/* Respekter redusert bevegelse */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01s !important; transition-duration: .01s !important; }
+  .hero-copy > *, .collage-tile { opacity: 1; transform: none; animation: none; }
+  .card { opacity: 1; transform: none; }
+}

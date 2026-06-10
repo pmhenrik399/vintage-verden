@@ -54,6 +54,7 @@
       <button class="card" data-id="${p.id}" data-idx="${idx}">
         <div class="imgbox">
           <img loading="lazy" src="${esc(img(p.imgs[0], '480w'))}" alt="${esc(p.title)}">
+          <div class="glare"></div>
           ${p.imgs.length > 1 ? `<span class="photos">${p.imgs.length} 📷</span>` : ''}
           <div class="img-veil"><span class="see">Se nærmere</span></div>
         </div>
@@ -107,6 +108,7 @@
         <div class="imgbox">
           <span class="feat-tag">Utvalgt</span>
           <img loading="lazy" src="${esc(img(p.imgs[0], '480w'))}" alt="${esc(p.title)}">
+          <div class="glare"></div>
         </div>
         <div class="feat-info">
           <div class="title">${esc(p.title)}</div>
@@ -120,6 +122,33 @@
     });
     $('featPrev').addEventListener('click', () => el.scrollBy({ left: -640, behavior: 'smooth' }));
     $('featNext').addEventListener('click', () => el.scrollBy({ left: 640, behavior: 'smooth' }));
+  }
+
+  /* ---------- Vintage-kvittering ---------- */
+  function barcodeHtml(id) {
+    const digits = (String(id) + String(id)).split('');
+    return digits.map((d) =>
+      `<i style="width:${1 + (+d % 4)}px;margin-right:${1 + (+d % 3)}px"></i>`).join('');
+  }
+
+  function receiptHtml(p) {
+    const short = p.title.length > 26 ? p.title.slice(0, 25).trimEnd() + '…' : p.title;
+    return `
+      <div class="receipt">
+        <div class="r-head">VINTAGE·VERDEN</div>
+        <div class="r-sub">— kvittering for en skatt —</div>
+        <div class="r-line"></div>
+        <div class="r-row"><span>1 × ${esc(short)}</span><span>${priceFmt(p.price)}</span></div>
+        ${p.cond ? `<div class="r-row dim"><span>Tilstand</span><span>${esc(p.cond)}</span></div>` : ''}
+        <div class="r-row dim"><span>Kategori</span><span>${esc(mainCat(p.cat))}</span></div>
+        <div class="r-row dim"><span>Frakt</span><span>Fiks ferdig via FINN</span></div>
+        <div class="r-line"></div>
+        <div class="r-row total"><span>TOTALT</span><span>${priceFmt(p.price)}</span></div>
+        <div class="barcode" aria-hidden="true">${barcodeHtml(p.id)}</div>
+        <div class="r-id">#${p.id}</div>
+        <div class="r-thanks">✦ TAKK FOR AT DU REDDER SKATTER ✦</div>
+      </div>
+      <div class="receipt-tear"></div>`;
   }
 
   /* ---------- Produktdetalj ---------- */
@@ -160,12 +189,7 @@
         </div>
         <div class="detail">
           <h2>${esc(p.title)}</h2>
-          <div class="price">${priceFmt(p.price)}</div>
-          <div class="meta-chips">
-            ${p.cat ? `<span>${esc(mainCat(p.cat))}</span>` : ''}
-            ${p.cond ? `<span>${esc(p.cond)}</span>` : ''}
-            <span>Sendes fra Drammen</span>
-          </div>
+          ${receiptHtml(p)}
           <div class="desc">${esc(p.desc || '')}</div>
           <div class="actions">
             <a class="btn-finn" href="${finnUrl(p.id)}" target="_blank" rel="noopener">Kjøp trygt på FINN →</a>
@@ -232,6 +256,53 @@
   window.addEventListener('scroll', () => toTop.classList.toggle('show', window.scrollY > 800), { passive: true });
   toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
+  /* ---------- 3D-tilt med glans ---------- */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let tilted = null;
+    const resetTilt = (el) => {
+      if (!el) return;
+      el.style.transform = '';
+      el.classList.remove('tilting');
+      const g = el.querySelector('.glare');
+      if (g) g.style.opacity = 0;
+    };
+    document.addEventListener('mousemove', (e) => {
+      const box = e.target.closest('.imgbox');
+      if (box !== tilted) { resetTilt(tilted); tilted = box; }
+      if (!box || !box.querySelector('.glare')) return;
+      const r = box.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      box.classList.add('tilting');
+      box.style.transform = `perspective(700px) rotateY(${(x * 8).toFixed(2)}deg) rotateX(${(-y * 8).toFixed(2)}deg) translateY(-3px)`;
+      const g = box.querySelector('.glare');
+      g.style.opacity = 1;
+      g.style.background = `radial-gradient(circle at ${((x + 0.5) * 100).toFixed(1)}% ${((y + 0.5) * 100).toFixed(1)}%, rgba(255,255,255,.32), transparent 62%)`;
+    }, { passive: true });
+    document.addEventListener('mouseleave', () => { resetTilt(tilted); tilted = null; });
+  }
+
+  /* ---------- Tellende statistikk ---------- */
+  function countUp(el) {
+    const target = parseFloat(el.dataset.target);
+    const dec = +el.dataset.dec || 0;
+    const dur = 1400, t0 = performance.now();
+    const step = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const v = target * (1 - Math.pow(1 - p, 3));
+      el.textContent = v.toLocaleString('nb-NO', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  const statsObs = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) {
+      document.querySelectorAll('#heroStats .num').forEach(countUp);
+      statsObs.disconnect();
+    }
+  });
+
   /* ---------- Init ---------- */
   grid.innerHTML = Array.from({ length: 12 }, () => '<div class="skel"></div>').join('');
 
@@ -239,7 +310,8 @@
     .then((r) => r.json())
     .then((data) => {
       state.all = data;
-      $('statCount').textContent = data.length.toLocaleString('nb-NO');
+      $('statCount').dataset.target = data.length;
+      statsObs.observe($('heroStats'));
       renderChips();
       render();
       buildCollage();
